@@ -31,13 +31,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
         queryset = Reservation.objects.all()
         serializer = ReservationDictSerializer(queryset, many=True)
         return Response(serializer.data)
-    def update(self, request):
+    def update(self, request, pk):
         """
         declaro el metodo update para que actualize con el serializer completo
         """
         instance = self.get_object()
         serializer = ReservationIDSerializer(instance, data=request.data, partial=True)
-        return Response(serializer.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
@@ -95,10 +98,11 @@ class ReservationCancelled(APIView):
             reservation = Reservation.objects.get(pk=reservation_id)
         except Reservation.DoesNotExist:
             raise ValueError("reservation ID no encontrado")
-        reservation.status = 'cancancelled'
-        reservation.save()
-        return Response({"message": "Checked out satisfactorio"}, status=status.HTTP_200_OK)
-        return Response({"message": "Checked out no es posible puesto que no ha hecho check in"}, status=status.HTTP_400_BAD_REQUEST)
+        if reservation.status == 'pending':
+            reservation.status = 'cancancelled'
+            reservation.save()
+            return Response({"message": "reserva cancelada satisfactoriamente"}, status=status.HTTP_200_OK)
+        return Response({"message": "cancelar no es posible puesto que el estado actual es "+reservation.status}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

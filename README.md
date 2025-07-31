@@ -17,6 +17,8 @@ Para instalar y ejecutar este proyecto, sigue estos pasos:
 
 Cada vez que se ejecute el build se borraran los datos y se cargaran datos de las habitaciones, las habitaciones cargadas son de la 101 a la 105, 201 a 205... hasta 605.
 
+la identificacion unica del guest se hace por medio del nombre y el correo.
+
 ## Endpoints:
 los endpoints disponibles son los siguientes:
 
