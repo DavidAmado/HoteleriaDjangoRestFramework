@@ -11,6 +11,9 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = ['numero']
 
 class ReservationDictSerializer(serializers.ModelSerializer):
+    """
+    serializer que trata al guest con su propio serializer, para guardar un guest cuando se crea una reserva
+    """
     room = serializers.PrimaryKeyRelatedField(many=False, queryset = Room.objects.all())
     guest = GuestSerializer(many=False)
     class Meta:
@@ -29,6 +32,9 @@ class ReservationDictSerializer(serializers.ModelSerializer):
         reservation = Reservation.objects.create(guest=guest, **validated_data)
         return reservation
 class ReservationIDSerializer(serializers.ModelSerializer):
+    """
+    serializer que trata al guest como su id cuando, para guardar un guest cuando se crea una reserva
+    """
     room = serializers.PrimaryKeyRelatedField(many=False, queryset = Room.objects.all())
     guest = serializers.PrimaryKeyRelatedField(many=False, queryset=Guest.objects.all())
     class Meta:
