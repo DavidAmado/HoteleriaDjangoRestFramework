@@ -44,6 +44,42 @@
 			"response": []
 		},
 		{
+			"name": "crear reservation con id",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"room\": 101,\n    \"guest\": {\n        \"nombre\": \"David\",\n        \"correo\": \"david@correo.com\",\n        \"telefono\": \"3209186458\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/reservations/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"reservations",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "modificar reservation",
 			"request": {
 				"auth": {
