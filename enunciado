@@ -1,0 +1,80 @@
+Prueba Técnica – API de Gestión de Reservas y Habitaciones 
+(45 minutos)
+Descripción General
+
+Objetivo: Construir una API RESTful con FastAPI (o cualquier framework Python) que permita gestionar reservas de habitaciones en un hotel. 
+
+El estado de ocupación de la habitación no se almacena, sino que se calcula dinámicamente a partir de las reservas activas.
+
+Entidades
+
+Guest:
+- id (int): Identificador único
+- full_name (str): Nombre del huésped
+- email (str): Correo electrónico
+- phone (str): Teléfono
+
+Room:
+- id (int): ID de la habitación
+- number (str): Número visible
+
+Reservation:
+- id (int): Identificador único
+- guest_id (int): Relación al huésped
+- room_id (int): Relación a la habitación reservada
+- check_in (datetime): Fecha de ingreso
+- check_out (datetime): Fecha de salida
+- status (str): [pending, inhouse, completed, cancelled]
+Reglas de Negocio
+
+- Una habitación está 'ocupada' si tiene una reserva 'inhouse' activa en la fecha actual (check_in >= hoy <= check_out).
+- El campo 'status' de habitación no existe: su estado se calcula en tiempo real.
+- Al crear una reserva, si el huésped ya existe (por email o teléfono), se reutiliza su guest_id.
+- Si se modifica una reserva sin cambiar datos del huésped, basta con enviar el guest_id.
+- Si se hace check-in de una reserva (cambio a estado 'inhouse'), cualquier otra reserva activa para la misma habitación en ese rango debe pasar a 'cancelled'.
+- Una reserva puede cambiar a 'completed' al hacer check-out si la fecha actual es mayor o igual al check_out.
+
+Endpoints Requeridos
+
+1. GET /reservations
+  - Lista reservas
+
+2. POST /reservations
+   - Crea un huésped (si no existe) y una reserva con estado 'pending'.
+
+3. POST /reservations/{id}/checkin
+   - Cambia estado a 'inhouse' y cancela reservas solapadas activas.
+
+4. POST /reservations/{id}/checkout
+   - Cambia estado a completed.
+
+5. GET /rooms/{room_id}/status
+   - Calcula y retorna 'ocupada' o 'disponible' según reservas inhouse activas.
+Endpoints Opcionales (Bonus)
+
+- POST /reservations/{id}/cancelled → cambia a cancelled
+- PUT /reservations/{id} → edita fechas o habitación (no datos del huésped)
+- GET /reservations/{id} → detalle de reserva
+- GET /rooms → lista de habitaciones
+
+Criterios de Aceptación (AC)
+
+AC1: Crear reservas junto con huésped si es nuevo.
+AC2: Cancelar reservas solapadas activas cuando se hace check-in de otra.
+AC3: Calcular correctamente el estado dinámico de la habitación ('ocupada' o 'disponible')..
+AC5: Se debe entregar colección de pruebas (Postman o Bruno).
+AC6: El repositorio debe estar disponible para los correos asignados.
+
+Plus: 
+-	La solución se ejecuta vía Docker con un solo comando
+Evaluación
+
+- Endpoints requeridos funcionales: 50 pts
+- Código limpio y documentado: 10 pts
+- Lógica de ocupación dinámica: 10 pts
+- Validaciones y reglas de negocio: 10 pts
+- Colección Postman/Bruno: 5 pts
+- Bonus opcionales implementados: 15 pts
+
+carlos.delaossa@sabre.com
+jesus.caro@sabre.com
