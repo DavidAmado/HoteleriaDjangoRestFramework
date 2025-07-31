@@ -11,6 +11,11 @@ COPY ./requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY ./ ./
+CMD ["python","manage.py","makemigrations","--noinput"]
+CMD ["python","manage.py","migrate","--noinput"]
+
+CMD ["python","manage.py","flush","--noinput"]
+CMD ["python","manage.py","loaddata","cargaCuartos.json"]
 
 CMD ["python","manage.py","runserver","0.0.0.0:8000"]
 

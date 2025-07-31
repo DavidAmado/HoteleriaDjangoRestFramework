@@ -11,39 +11,43 @@ from django.utils import timezone
 
 # Create your views here.
 
-class ReservationViewSet(viewsets.ViewSet):
+class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all()
-    def create(self, request):
-        guest = request.data.get('guest')
-        print ("request", request)
-        print ("request.data", request.data)
-        print ("asd", guest)
+    def get_serializer_class(self):
+        """
+        De esta manera se elige serializer, dependeindo del dato que viene para poder, con la misma url 
+        responder 2 payloads distintos sin que falle por comprobacion de campos.
+        """
+        guest = self.request.data.get('guest')
         if isinstance(guest, dict):
-            serializer = ReservationDictSerializer(data=request.data)
+            return ReservationDictSerializer
         else:
-            serializer = ReservationIDSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return ReservationIDSerializer
 
     def list(self, request):
+        """
+        declaro el metodo list para que liste con el serializer completo
+        """
         queryset = Reservation.objects.all()
         serializer = ReservationDictSerializer(queryset, many=True)
+        return Response(serializer.data)
+    def update(self, request):
+        """
+        declaro el metodo update para que actualize con el serializer completo
+        """
+        instance = self.get_object()
+        serializer = ReservationIDSerializer(instance, data=request.data, partial=True)
         return Response(serializer.data)
 
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
-class GuestViewSet(viewsets.ModelViewSet):
-    queryset = Guest.objects.all()
-    serializer_class = GuestSerializer
-
 @method_decorator(csrf_exempt, name='dispatch')
 class ReservationCheckIn(APIView):
+    """
+    view encargada de hacer checkin guardar hora, y validar si existe otra reserva solapada
+    """
     def post(self, request, reservation_id):
         try:
             reservation = Reservation.objects.get(pk=reservation_id)
@@ -66,6 +70,9 @@ class ReservationCheckIn(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ReservationCheckOut(APIView):
+    """
+    view encargada de hacer chekout y guardar la hora
+    """
     def post(self, request, reservation_id):
         try:
             reservation = Reservation.objects.get(pk=reservation_id)
@@ -78,9 +85,27 @@ class ReservationCheckOut(APIView):
             return Response({"message": "Checked out satisfactorio"}, status=status.HTTP_200_OK)
         return Response({"message": "Checked out no es posible puesto que no ha hecho check in"}, status=status.HTTP_400_BAD_REQUEST)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class ReservationCancelled(APIView):
+    """
+    view encargada de hacer cancelar reserva
+    """
+    def post(self, request, reservation_id):
+        try:
+            reservation = Reservation.objects.get(pk=reservation_id)
+        except Reservation.DoesNotExist:
+            raise ValueError("reservation ID no encontrado")
+        reservation.status = 'cancancelled'
+        reservation.save()
+        return Response({"message": "Checked out satisfactorio"}, status=status.HTTP_200_OK)
+        return Response({"message": "Checked out no es posible puesto que no ha hecho check in"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class IsRoomsAviable(APIView):
+    """
+    view encargada de revisar disponibilidad en cuartos
+    """
     def get(self, request, room_id):
         try:
             room = Room.objects.get(pk=room_id)
